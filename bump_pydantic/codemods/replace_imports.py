@@ -98,19 +98,7 @@ IMPORT_MATCH = m.OneOf(*[info.import_from for info in IMPORT_INFOS])
 class ReplaceImportsCodemod(VisitorBasedCodemodCommand):
     @m.leave(IMPORT_MATCH)
     def leave_replace_import(self, _: cst.ImportFrom, updated_node: cst.ImportFrom) -> cst.ImportFrom:
-        for import_info in IMPORT_INFOS:
-            if m.matches(updated_node, import_info.import_from):
-                aliases: Sequence[cst.ImportAlias] = updated_node.names  # type: ignore
-                # If multiple objects are imported in a single import statement,
-                # we need to remove only the one we're replacing.
-                AddImportsVisitor.add_needed_import(self.context, *import_info.to_import_str)
-                if len(updated_node.names) > 1:  # type: ignore
-                    names = [alias for alias in aliases if alias.name.value != import_info.to_import_str[-1]]
-                    names[-1] = names[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
-                    updated_node = updated_node.with_changes(names=names)
-                else:
-                    return cst.RemoveFromParent()  # type: ignore[return-value]
-        return updated_node
+        pass
 
 
 if __name__ == "__main__":

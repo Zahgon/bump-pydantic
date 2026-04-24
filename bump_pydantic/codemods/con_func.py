@@ -44,67 +44,22 @@ class ConFuncCallCommand(VisitorBasedCodemodCommand):
 
     @m.leave(CON_NUMBER_CALL | CON_COLLECTION_CALL | CONSTR_CALL)
     def leave_annotation_call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Subscript:
-        if m.matches(original_node.func, m.Name()):
-            func_name = cast(str, original_node.func.value)  # type: ignore
-        else:
-            func_name = cast(str, original_node.func.attr.value)  # type: ignore
-        type_name = MAP_FUNC_TO_TYPE[func_name]
-
-        needed_import = MAP_TYPE_TO_NEEDED_IMPORT.get(type_name)
-        if needed_import is not None:
-            AddImportsVisitor.add_needed_import(context=self.context, **needed_import)  # type: ignore[arg-type]
-
-        if type_name in COLLECTIONS:
-            slice_value = cst.Index(
-                value=cst.Subscript(
-                    value=cst.Name(type_name),
-                    slice=[cst.SubscriptElement(slice=cst.Index(value=self.inner_type))],
-                )
-            )
-        else:
-            slice_value = cst.Index(value=cst.Name(type_name))
-
-        AddImportsVisitor.add_needed_import(context=self.context, module="typing_extensions", obj="Annotated")
-        return cst.Subscript(
-            value=cst.Name("Annotated"),
-            slice=[
-                cst.SubscriptElement(slice=slice_value),
-                cst.SubscriptElement(slice=cst.Index(value=updated_node)),
-            ],
-        )
+        pass
 
     @m.leave(CONSTR_CALL)
     def leave_constr_call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-        self._remove_import(original_node.func)
-        AddImportsVisitor.add_needed_import(context=self.context, module="pydantic", obj="StringConstraints")
-        return updated_node.with_changes(
-            func=cst.Name("StringConstraints"),
-            args=[
-                arg if arg.keyword and arg.keyword.value != "regex" else arg.with_changes(keyword=cst.Name("pattern"))
-                for arg in updated_node.args
-            ],
-        )
+        pass
 
     @m.leave(CON_NUMBER_CALL)
     def leave_con_number_call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-        self._remove_import(original_node.func)
-        AddImportsVisitor.add_needed_import(context=self.context, module="pydantic", obj="Field")
-        return updated_node.with_changes(func=cst.Name("Field"))
+        pass
 
     @m.leave(CON_COLLECTION_CALL)
     def leave_con_collection_call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-        self._remove_import(original_node.func)
-        AddImportsVisitor.add_needed_import(context=self.context, module="pydantic", obj="Field")
-        # NOTE: It's guaranteed to have at least one argument.
-        self.inner_type = updated_node.args[0].value
-        return updated_node.with_changes(func=cst.Name("Field"), args=updated_node.args[1:])
+        pass
 
     def _remove_import(self, func: cst.BaseExpression) -> None:
-        if m.matches(func, m.Name()):
-            assert isinstance(func, cst.Name)
-            RemoveImportsVisitor.remove_unused_import(context=self.context, module="pydantic", obj=func.value)
-        elif m.matches(func, m.Attribute()):
-            RemoveImportsVisitor.remove_unused_import(context=self.context, module="pydantic")
+        pass
 
 
 if __name__ == "__main__":

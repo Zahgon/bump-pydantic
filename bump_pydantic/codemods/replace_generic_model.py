@@ -13,15 +13,7 @@ GENERIC_MODEL_ARG = m.Arg(value=m.Name("GenericModel")) | m.Arg(
 class ReplaceGenericModelCommand(VisitorBasedCodemodCommand):
     @m.leave(m.ClassDef(bases=[m.ZeroOrMore(), GENERIC_MODEL_ARG, m.ZeroOrMore()]))
     def leave_generic_model(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-        RemoveImportsVisitor.remove_unused_import(context=self.context, module="pydantic.generics", obj="GenericModel")
-        RemoveImportsVisitor.remove_unused_import(context=self.context, module="pydantic", obj="generics")
-        AddImportsVisitor.add_needed_import(context=self.context, module="pydantic", obj="BaseModel")
-        return updated_node.with_changes(
-            bases=[
-                cst.Arg(value=cst.Name("BaseModel")) if m.matches(base, GENERIC_MODEL_ARG) else base
-                for base in updated_node.bases
-            ]
-        )
+        pass
 
 
 if __name__ == "__main__":

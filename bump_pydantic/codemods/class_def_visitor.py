@@ -39,67 +39,11 @@ class ClassDefVisitor(VisitorBasedCodemodCommand):
         self.context.scratch.setdefault(self.CLS_CONTEXT_KEY, defaultdict(set))
 
     def visit_ClassDef(self, node: cst.ClassDef) -> None:
-        fqn_set = self.get_metadata(FullyQualifiedNameProvider, node)
-
-        if not fqn_set:
-            return None
-
-        fqn: QualifiedName = next(iter(fqn_set))  # type: ignore
-
-        if not node.bases:
-            self.context.scratch[self.NO_BASE_MODEL_CONTEXT_KEY].add(fqn.name)
-
-        for arg in node.bases:
-            base_fqn_set = self.get_metadata(FullyQualifiedNameProvider, arg.value)
-            base_fqn_set = base_fqn_set or set()
-
-            for base_fqn in cast(Set[QualifiedName], iter(base_fqn_set)):  # type: ignore
-                if base_fqn.name in self.context.scratch[self.BASE_MODEL_CONTEXT_KEY]:
-                    self.context.scratch[self.BASE_MODEL_CONTEXT_KEY].add(fqn.name)
-                elif base_fqn.name in self.context.scratch[self.NO_BASE_MODEL_CONTEXT_KEY]:
-                    self.context.scratch[self.NO_BASE_MODEL_CONTEXT_KEY].add(fqn.name)
-
-            # In case we have the following scenario:
-            # class A(B): ...
-            # class B(BaseModel): ...
-            # class D(C): ...
-            # class C: ...
-            # We want to disambiguate `A` as soon as we see `B` is a `BaseModel`.
-            if (
-                fqn.name in self.context.scratch[self.BASE_MODEL_CONTEXT_KEY]
-                and fqn.name in self.context.scratch[self.CLS_CONTEXT_KEY]
-            ):
-                for parent_class in self.context.scratch[self.CLS_CONTEXT_KEY].pop(fqn.name):
-                    self.context.scratch[self.BASE_MODEL_CONTEXT_KEY].add(parent_class)
-
-            # In case we have the following scenario:
-            # class A(B): ...
-            # class B(BaseModel): ...
-            # class D(C): ...
-            # class C: ...
-            # We want to disambiguate `D` as soon as we see `C` is NOT a `BaseModel`.
-            if (
-                fqn.name in self.context.scratch[self.NO_BASE_MODEL_CONTEXT_KEY]
-                and fqn.name in self.context.scratch[self.CLS_CONTEXT_KEY]
-            ):
-                for parent_class in self.context.scratch[self.CLS_CONTEXT_KEY].pop(fqn.name):
-                    self.context.scratch[self.NO_BASE_MODEL_CONTEXT_KEY].add(parent_class)
-
-            # In case we have the following scenario:
-            # class A(B): ...
-            # ...And B is not known.
-            # We want to make sure that B -> A is added to the `cls` context, so if we find B later,
-            # we can disambiguate.
-            if fqn.name not in (
-                *self.context.scratch[self.BASE_MODEL_CONTEXT_KEY],
-                *self.context.scratch[self.NO_BASE_MODEL_CONTEXT_KEY],
-            ):
-                for base_fqn in cast(Set[QualifiedName], base_fqn_set):
-                    self.context.scratch[self.CLS_CONTEXT_KEY][base_fqn.name].add(fqn.name)
+        pass
 
     # TODO: Implement this if needed...
     def next_file(self, visited: set[str]) -> str | None:
-        return None
+        pass
 
 
 if __name__ == "__main__":

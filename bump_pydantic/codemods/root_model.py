@@ -21,28 +21,15 @@ class RootModelCommand(VisitorBasedCodemodCommand):
 
     @m.visit(BASE_MODEL_MATCHER)
     def visit_base_model(self, node: cst.ClassDef) -> None:
-        self.inside_base_model = True
+        pass
 
     @m.leave(BASE_MODEL_MATCHER)
     def leave_base_model(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-        self.inside_base_model = False
-        if self.root_type:
-            AddImportsVisitor.add_needed_import(self.context, "pydantic", "RootModel")
-            RemoveImportsVisitor.remove_unused_import(self.context, "pydantic", "BaseModel")
-            root_slice = cst.SubscriptElement(slice=self.root_type)  # type: ignore[arg-type]
-            root_model = cst.Arg(value=cst.Subscript(value=cst.Name("RootModel"), slice=[root_slice]))
-            bases = [root_model if m.matches(base, BASE_MODEL_ARG) else base for base in updated_node.bases]
-            self.root_type = None
-            return updated_node.with_changes(bases=bases)
-        return updated_node
+        pass
 
     @m.leave(ROOT_ASSIGNMENT_MATCHER)
     def leave_root_assignment(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
-        if not self.inside_base_model:
-            return updated_node
-
-        self.root_type = updated_node.value
-        return cst.RemoveFromParent()  # type: ignore[return-value]
+        pass
 
 
 if __name__ == "__main__":

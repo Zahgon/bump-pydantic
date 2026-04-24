@@ -68,70 +68,28 @@ class FieldCodemod(VisitorBasedCodemodCommand):
 
     @m.visit(IMPORT_FIELD)
     def visit_field_import(self, node: cst.Module) -> None:
-        self.has_field_import = True
+        pass
 
     @m.leave(IMPORT_FIELD)
     def leave_field_import(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        self.has_field_import = False
-        return updated_node
+        pass
 
     @m.visit(ANN_ASSIGN_WITH_FIELD)
     def visit_field_assign(self, node: cst.AnnAssign) -> None:
-        self.inside_field_assign = True
-        self._const: Union[cst.Arg, None] = None
+        pass
 
     @m.leave(ANN_ASSIGN_WITH_FIELD)
     def leave_field_assign(self, original_node: cst.AnnAssign, updated_node: cst.AnnAssign) -> cst.AnnAssign:
-        self.inside_field_assign = False
-
-        if self._const is None:
-            return updated_node
-
-        AddImportsVisitor.add_needed_import(self.context, "typing", "Literal")
-        RemoveImportsVisitor.remove_unused_import(self.context, "pydantic", "Field")
-        return updated_node.with_changes(
-            annotation=cst.Annotation(
-                annotation=cst.Subscript(
-                    value=cst.Name("Literal"),
-                    slice=[cst.SubscriptElement(slice=cst.Index(value=self._const.value))],
-                )
-            ),
-            value=self._const.value,
-        )
+        pass
 
     @m.visit(m.Call(func=m.Name("Field")))
     def visit_field_call(self, node: cst.Call) -> None:
         # Check if there's a `const=True` argument.
-        const_arg = m.Arg(value=m.Name("True"), keyword=m.Name("const"))
-        if m.matches(node, m.Call(func=m.Name("Field"), args=[~m.Arg(value=m.Name("...")), const_arg])):
-            self._const = node.args[0]
+        pass
 
     @m.leave(m.Call(func=m.Name("Field")))
     def leave_field_call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Call:
-        if not self.has_field_import or not self.inside_field_assign:
-            return updated_node
-
-        new_args: List[cst.Arg] = []
-        for arg in updated_node.args:
-            if m.matches(arg, m.Arg(keyword=m.Name())):
-                keyword = RENAMED_KEYWORDS.get(arg.keyword.value, arg.keyword.value)  # type: ignore
-                value = arg.value
-                if arg.keyword:
-                    if arg.keyword.value == "allow_mutation":
-                        # The `allow_mutation` keyword is the negative of `frozen`.
-                        if m.matches(arg.value, m.Name(value="False")):
-                            value = cst.Name("True")
-                        elif m.matches(arg.value, m.Name(value="True")):
-                            value = cst.Name("False")
-                    if arg.keyword.value == "example":
-                        # The example keyword is now a list, `examples`.
-                        value = cst.List([cst.Element(arg.value)])
-                new_arg = arg.with_changes(keyword=arg.keyword.with_changes(value=keyword), value=value)  # type: ignore
-                new_args.append(new_arg)  # type: ignore
-            else:
-                new_args.append(arg)
-
-        return updated_node.with_changes(args=new_args)
+        pass
 
 
 if __name__ == "__main__":

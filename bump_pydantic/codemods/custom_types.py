@@ -19,18 +19,7 @@ class CustomTypeCodemod(VisitorBasedCodemodCommand):
     def leave_modify_schema_func(
         self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
     ) -> cst.FunctionDef:
-        for line in [*updated_node.leading_lines, *updated_node.lines_after_decorators]:
-            if m.matches(line, m.EmptyLine(comment=m.Comment(value=CHECK_LINK_COMMENT))):
-                return updated_node
-
-        comment = COMMENT_BY_FUNC_NAME[updated_node.name.value]
-        return updated_node.with_changes(
-            lines_after_decorators=[
-                *updated_node.lines_after_decorators,
-                cst.EmptyLine(comment=cst.Comment(value=(comment))),
-                cst.EmptyLine(comment=cst.Comment(value=(CHECK_LINK_COMMENT))),
-            ]
-        )
+        pass
 
 
 if __name__ == "__main__":

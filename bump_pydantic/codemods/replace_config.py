@@ -126,77 +126,36 @@ class ReplaceConfigCodemod(VisitorBasedCodemodCommand):
 
     @m.visit(m.ClassDef(bases=[m.ZeroOrMore(), m.Arg(value=m.Name("BaseSettings")), m.ZeroOrMore()]))
     def visit_settings_with_config(self, node: cst.ClassDef) -> None:
-        self.is_base_settings = True
+        pass
 
     @m.visit(m.ClassDef(name=m.Name(value="Config")))
     def visit_config_class(self, node: cst.ClassDef) -> None:
-        scope = self.get_metadata(ScopeProvider, node)
-        if isinstance(scope, ClassScope):
-            self.inside_config_class = True
+        pass
 
     @m.leave(m.ClassDef(name=m.Name(value="Config")))
     def leave_config_class(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-        self.inside_config_class = False
-        if self.invalid_config_class or self.inherited_config_class:
-            for line in updated_node.leading_lines:
-                if m.matches(line, m.EmptyLine(comment=m.Comment(value=CHECK_LINK_COMMENT))):
-                    return updated_node
-
-        if self.invalid_config_class:
-            return updated_node.with_changes(
-                leading_lines=[
-                    *updated_node.leading_lines,
-                    cst.EmptyLine(comment=cst.Comment(value=(REFACTOR_COMMENT))),
-                    cst.EmptyLine(comment=cst.Comment(value=(CHECK_LINK_COMMENT))),
-                ]
-            )
-        elif self.inherited_config_class:
-            return updated_node.with_changes(
-                leading_lines=[
-                    *updated_node.leading_lines,
-                    cst.EmptyLine(comment=cst.Comment(value=(INHERIT_CONFIG_COMMENT))),
-                    cst.EmptyLine(comment=cst.Comment(value=(CHECK_LINK_COMMENT))),
-                ]
-            )
-        return updated_node
+        pass
 
     def visit_Assign(self, node: cst.Assign) -> None:
-        self.assign_value = node.value
+        pass
 
     def visit_AssignTarget(self, node: cst.AssignTarget) -> None:
-        if self.inside_config_class:
-            keyword = RENAMED_KEYS.get(node.target.value, node.target.value)  # type: ignore[attr-defined]
-            if m.matches(self.assign_value, EXTRA_ATTRIBUTE):
-                value = cst.SimpleString(value=f'"{self.assign_value.attr.value}"')  # type: ignore[attr-defined]
-                RemoveImportsVisitor.remove_unused_import(self.context, "pydantic", "Extra")
-            else:
-                value = self.assign_value  # type: ignore[assignment]
-            self.config_args.append(
-                cst.Arg(
-                    keyword=node.target.with_changes(value=keyword),  # type: ignore[arg-type]
-                    value=value,
-                    equal=cst.AssignEqual(
-                        whitespace_before=cst.SimpleWhitespace(""),
-                        whitespace_after=cst.SimpleWhitespace(""),
-                    ),
-                )
-            )
+        pass
 
     def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-        return updated_node
+        pass
 
     @m.visit(BASE_MODEL_WITH_INHERITED_CONFIG)
     def visit_inherited_config_class(self, node: cst.ClassDef) -> None:
-        self.inherited_config_class = True
+        pass
 
     @m.leave(BASE_MODEL_WITH_INHERITED_CONFIG)
     def leave_inherited_config_class(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-        self.inherited_config_class = False
-        return updated_node
+        pass
 
     @m.visit(BASE_MODEL_WITH_INVALID_CONFIG)
     def visit_config_class_with_more_than_assignments(self, node: cst.ClassDef) -> None:
-        self.invalid_config_class = True
+        pass
 
     @m.leave(BASE_MODEL_WITH_CONFIG)
     def leave_config_class_childless(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
@@ -207,47 +166,11 @@ class ReplaceConfigCodemod(VisitorBasedCodemodCommand):
         assigned a `ConfigDict` object with the same arguments as the attributes
         from `Config` class.
         """
-        if self.invalid_config_class:
-            self.invalid_config_class = False
-            return updated_node
-        if self.is_base_settings:
-            needed_import = {"module": "pydantic_settings", "obj": "SettingsConfigDict"}
-        else:
-            needed_import = {"module": "pydantic", "obj": "ConfigDict"}
-        AddImportsVisitor.add_needed_import(context=self.context, **needed_import)  # type: ignore[arg-type]
-        block = cst.ensure_type(updated_node.body, cst.IndentedBlock)
-        body = [
-            cst.SimpleStatementLine(
-                body=[
-                    cst.Assign(
-                        targets=[cst.AssignTarget(target=cst.Name("model_config"))],
-                        value=cst.Call(
-                            func=cst.Name("SettingsConfigDict" if self.is_base_settings else "ConfigDict"),
-                            args=self.config_args,
-                        ),
-                    )
-                ],
-                leading_lines=self._leading_lines_from_removed_keys(self.config_args),
-            )
-            if m.matches(statement, m.ClassDef(name=m.Name(value="Config")))
-            else statement
-            for statement in block.body
-        ]
-        self.is_base_settings = False
-        self.config_args = []
-        return updated_node.with_changes(body=updated_node.body.with_changes(body=body))
+        pass
 
     @staticmethod
     def _leading_lines_from_removed_keys(args: List[cst.Arg]) -> List[cst.EmptyLine]:
-        removed_keys = [arg.keyword.value for arg in args if arg.keyword.value in REMOVED_KEYS]  # type: ignore
-        if not removed_keys:
-            return []
-
-        formatted_keys = ", ".join(f"`{key}`" for key in removed_keys)
-        return [
-            cst.EmptyLine(comment=cst.Comment(value=REMOVED_KEYS_COMMENT.format(keys=formatted_keys))),
-            cst.EmptyLine(comment=cst.Comment(value=CHECK_LINK_COMMENT)),
-        ]
+        pass
 
 
 if __name__ == "__main__":

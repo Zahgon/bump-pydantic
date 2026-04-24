@@ -73,92 +73,36 @@ class ValidatorCodemod(VisitorBasedCodemodCommand):
 
     @m.visit(IMPORT_VALIDATOR)
     def visit_import_validator(self, node: cst.CSTNode) -> None:
-        self._import_pydantic_validator = True
-        self._import_pydantic_root_validator = True
+        pass
 
     def leave_Module(self, original_node: Module, updated_node: Module) -> Module:
-        self._import_pydantic_validator = False
-        self._import_pydantic_root_validator = False
-        return updated_node
+        pass
 
     @m.visit(VALIDATOR_DECORATOR | ROOT_VALIDATOR_DECORATOR)
     def visit_validator_decorator(self, node: cst.Decorator) -> None:
-        if m.matches(node.decorator, m.Call()):
-            for arg in node.decorator.args:  # type: ignore[attr-defined]
-                pre_false = m.Arg(keyword=m.Name("pre"), value=m.Name("False"))
-                pre_true = m.Arg(keyword=m.Name("pre"), value=m.Name("True"))
-                if m.matches(arg, m.Arg(keyword=m.Name("allow_reuse")) | pre_false):
-                    continue
-                if m.matches(arg, pre_true):
-                    self._args.append(arg.with_changes(keyword=cst.Name("mode"), value=cst.SimpleString('"before"')))
-                elif m.matches(arg.keyword, m.Name(value=m.MatchIfTrue(lambda v: v in ("each_item", "always")))):
-                    self._should_add_comment = True
-                else:
-                    # The `check_fields` kw-argument and all positional arguments can be just copied.
-                    self._args.append(arg)
-        else:
-            """This only happens for `@validator`, not with `@validator()`. The parenthesis makes it not be a `Call`"""
-            self._should_add_comment = True
-
-        # Removes the trailing comma on the last argument e.g.
-        # `@validator(allow_reuse=True, )` -> `@validator(allow_reuse=True)`
-        if self._args:
-            self._args[-1] = self._args[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
+        pass
 
     @m.visit(VALIDATOR_FUNCTION)
     def visit_validator_func(self, node: cst.FunctionDef) -> None:
-        for line in node.leading_lines:
-            if m.matches(line, m.EmptyLine(comment=m.Comment(value=CHECK_LINK_COMMENT))):
-                self._has_comment = True
-        # We are only able to refactor the `@validator` when the function has only `cls` and `v` as arguments.
-        if len(node.params.params) > 2:
-            self._should_add_comment = True
+        pass
 
     @m.leave(ROOT_VALIDATOR_DECORATOR)
     def leave_root_validator_func(self, original_node: cst.Decorator, updated_node: cst.Decorator) -> cst.Decorator:
-        if self._has_comment:
-            return updated_node
-
-        if self._should_add_comment:
-            return self._decorator_with_leading_comment(updated_node, ROOT_VALIDATOR_COMMENT)
-
-        return self._replace_validators(updated_node, "root_validator", "model_validator")
+        pass
 
     @m.leave(VALIDATOR_DECORATOR)
     def leave_validator_decorator(self, original_node: cst.Decorator, updated_node: cst.Decorator) -> cst.Decorator:
-        if self._has_comment:
-            return updated_node
-
-        if self._should_add_comment:
-            return self._decorator_with_leading_comment(updated_node, VALIDATOR_COMMENT)
-
-        return self._replace_validators(updated_node, "validator", "field_validator")
+        pass
 
     @m.leave(VALIDATOR_FUNCTION | ROOT_VALIDATOR_FUNCTION)
     def leave_validator_func(self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef) -> cst.FunctionDef:
-        self._args = []
-        self._has_comment = False
-        if self._should_add_comment:
-            self._should_add_comment = False
-            return updated_node
-
-        classmethod_decorator = cst.Decorator(decorator=cst.Name("classmethod"))
-        return updated_node.with_changes(decorators=[*updated_node.decorators, classmethod_decorator])
+        pass
 
     def _decorator_with_leading_comment(self, node: cst.Decorator, comment: str) -> cst.Decorator:
-        return node.with_changes(
-            leading_lines=[
-                *node.leading_lines,
-                cst.EmptyLine(comment=cst.Comment(value=(comment))),
-                cst.EmptyLine(comment=cst.Comment(value=(CHECK_LINK_COMMENT))),
-            ]
-        )
+        pass
 
     def _replace_validators(self, node: cst.Decorator, old_name: str, new_name: str) -> cst.Decorator:
-        RemoveImportsVisitor.remove_unused_import(self.context, "pydantic", old_name)
-        AddImportsVisitor.add_needed_import(self.context, "pydantic", new_name)
-        decorator = node.decorator.with_changes(func=cst.Name(new_name), args=self._args)
-        return node.with_changes(decorator=decorator)
+        pass
 
 
 if __name__ == "__main__":
