@@ -37,10 +37,7 @@ class AddDefaultNoneCommand(VisitorBasedCodemodCommand):
     METADATA_DEPENDENCIES = (FullyQualifiedNameProvider,)
 
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
-
-        self.inside_base_model = False
-        self.should_add_none = False
+        raise NotImplementedError
 
     def visit_ClassDef(self, node: cst.ClassDef) -> None:
         pass

@@ -116,13 +116,7 @@ class ReplaceConfigCodemod(VisitorBasedCodemodCommand):
     METADATA_DEPENDENCIES = (ScopeProvider,)
 
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
-
-        self.inside_config_class = False
-        self.is_base_settings = False
-        self.invalid_config_class = False
-        self.inherited_config_class = False
-        self.config_args: List[cst.Arg] = []
+        raise NotImplementedError
 
     @m.visit(m.ClassDef(bases=[m.ZeroOrMore(), m.Arg(value=m.Name("BaseSettings")), m.ZeroOrMore()]))
     def visit_settings_with_config(self, node: cst.ClassDef) -> None:

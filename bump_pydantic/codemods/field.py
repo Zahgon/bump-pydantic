@@ -61,10 +61,7 @@ ANN_ASSIGN_WITH_FIELD = m.AnnAssign(
 
 class FieldCodemod(VisitorBasedCodemodCommand):
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
-
-        self.has_field_import = False
-        self.inside_field_assign = False
+        raise NotImplementedError
 
     @m.visit(IMPORT_FIELD)
     def visit_field_import(self, node: cst.Module) -> None:

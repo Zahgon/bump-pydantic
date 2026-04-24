@@ -40,39 +40,4 @@ class Rule(str, Enum):
 
 
 def gather_codemods(disabled: List[Rule]) -> List[Type[ContextAwareTransformer]]:
-    codemods: List[Type[ContextAwareTransformer]] = []
-
-    if Rule.BP001 not in disabled:
-        codemods.append(AddDefaultNoneCommand)
-
-    if Rule.BP002 not in disabled:
-        codemods.append(ReplaceConfigCodemod)
-
-    # The `ConFuncCallCommand` needs to run before the `FieldCodemod`.
-    if Rule.BP008 not in disabled:
-        codemods.append(ConFuncCallCommand)
-
-    if Rule.BP003 not in disabled:
-        codemods.append(FieldCodemod)
-
-    if Rule.BP004 not in disabled:
-        codemods.append(ReplaceImportsCodemod)
-
-    if Rule.BP005 not in disabled:
-        codemods.append(ReplaceGenericModelCommand)
-
-    if Rule.BP006 not in disabled:
-        codemods.append(RootModelCommand)
-
-    if Rule.BP007 not in disabled:
-        codemods.append(ValidatorCodemod)
-
-    if Rule.BP009 not in disabled:
-        codemods.append(CustomTypeCodemod)
-
-    if Rule.BP010 not in disabled:
-        codemods.append(AddAnnotationsCommand)
-
-    # Those codemods need to be the last ones.
-    codemods.extend([RemoveImportsVisitor, AddImportsVisitor])
-    return codemods
+    raise NotImplementedError

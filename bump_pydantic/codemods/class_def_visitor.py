@@ -28,15 +28,7 @@ class ClassDefVisitor(VisitorBasedCodemodCommand):
     CLS_CONTEXT_KEY = "cls"
 
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
-        self.module_fqn: None | QualifiedName = None
-
-        self.context.scratch.setdefault(
-            self.BASE_MODEL_CONTEXT_KEY,
-            {"pydantic.BaseModel", "pydantic.main.BaseModel"},
-        )
-        self.context.scratch.setdefault(self.NO_BASE_MODEL_CONTEXT_KEY, set())
-        self.context.scratch.setdefault(self.CLS_CONTEXT_KEY, defaultdict(set))
+        raise NotImplementedError
 
     def visit_ClassDef(self, node: cst.ClassDef) -> None:
         pass

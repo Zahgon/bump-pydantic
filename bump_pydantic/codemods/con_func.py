@@ -40,7 +40,7 @@ COLLECTIONS = ("List", "Set", "FrozenSet")
 
 class ConFuncCallCommand(VisitorBasedCodemodCommand):
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
+        raise NotImplementedError
 
     @m.leave(CON_NUMBER_CALL | CON_COLLECTION_CALL | CONSTR_CALL)
     def leave_annotation_call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.Subscript:

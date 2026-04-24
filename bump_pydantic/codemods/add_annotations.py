@@ -50,14 +50,7 @@ class AddAnnotationsCommand(VisitorBasedCodemodCommand):
     METADATA_DEPENDENCIES = (FullyQualifiedNameProvider,)
 
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
-
-        self.inside_base_model = False
-        self.base_model_fields: set[cst.Assign | cst.AnnAssign | cst.SimpleStatementLine] = set()
-        self.statement: cst.SimpleStatementLine | None = None
-        self.needs_comment = False
-        self.has_comment = False
-        self.in_field = False
+        raise NotImplementedError
 
     def visit_ClassDef(self, node: cst.ClassDef) -> None:
         pass

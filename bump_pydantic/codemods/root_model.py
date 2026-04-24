@@ -14,10 +14,7 @@ ROOT_ASSIGNMENT_MATCHER = m.Assign(targets=[m.AssignTarget(target=m.Name("__root
 
 class RootModelCommand(VisitorBasedCodemodCommand):
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
-
-        self.inside_base_model = False
-        self.root_type: Union[cst.BaseExpression, None] = None
+        raise NotImplementedError
 
     @m.visit(BASE_MODEL_MATCHER)
     def visit_base_model(self, node: cst.ClassDef) -> None:

@@ -36,14 +36,7 @@ IMPORTS = {
 
 
 def resolve_module_parts(module_parts: list[str]) -> m.Attribute | m.Name:
-    if len(module_parts) == 1:
-        return m.Name(module_parts[0])
-    if len(module_parts) == 2:
-        first, last = module_parts
-        return m.Attribute(value=m.Name(first), attr=m.Name(last))
-    last_name = module_parts.pop()
-    attr = resolve_module_parts(module_parts)
-    return m.Attribute(value=attr, attr=m.Name(last_name))
+    raise NotImplementedError
 
 
 def get_import_from_from_str(import_str: str) -> m.ImportFrom:
@@ -68,13 +61,7 @@ def get_import_from_from_str(import_str: str) -> m.ImportFrom:
             names=[ImportAlias(name=Name("d"))],
         )
     """
-    module, name = import_str.split(":")
-    module_parts = module.split(".")
-    module_node = resolve_module_parts(module_parts)
-    return m.ImportFrom(
-        module=module_node,
-        names=[m.ZeroOrMore(), m.ImportAlias(name=m.Name(value=name)), m.ZeroOrMore()],
-    )
+    raise NotImplementedError
 
 
 @dataclass

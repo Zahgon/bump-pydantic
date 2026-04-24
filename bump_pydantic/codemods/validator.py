@@ -63,13 +63,7 @@ ROOT_VALIDATOR_FUNCTION = m.FunctionDef(decorators=[m.ZeroOrMore(), ROOT_VALIDAT
 
 class ValidatorCodemod(VisitorBasedCodemodCommand):
     def __init__(self, context: CodemodContext) -> None:
-        super().__init__(context)
-
-        self._import_pydantic_validator = self._import_pydantic_root_validator = False
-        self._already_modified = False
-        self._should_add_comment = False
-        self._has_comment = False
-        self._args: List[cst.Arg] = []
+        raise NotImplementedError
 
     @m.visit(IMPORT_VALIDATOR)
     def visit_import_validator(self, node: cst.CSTNode) -> None:
